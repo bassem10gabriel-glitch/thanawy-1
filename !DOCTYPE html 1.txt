@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الصدارة - مسابقة الخروج</title>
+    <style>
+        :root {
+            --sea-dark: #0f1c2e;
+            --sea-light: #1f3a5f;
+            --sand: #d4af37; /* Gold/Sand */
+            --sand-light: #f3e5ab;
+            --text-main: #ffffff;
+            --glass: rgba(15, 28, 46, 0.85);
+            --glass-border: rgba(212, 175, 55, 0.3);
+            --glow: 0 0 15px rgba(212, 175, 55, 0.6);
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--sea-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- RED SEA ANIMATION BACKGROUND --- */
+        .sea-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, var(--sand-light) 0%, var(--sand) 20%, var(--sea-light) 40%, var(--sea-dark) 90%);
+            overflow: hidden;
+        }
+
+        .wave {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--sea-dark), var(--sea-light));
+            opacity: 0.9;
+            transition: transform 3s ease-in-out;
+            filter: blur(5px);
+        }
+
+        .wave.left {
+            left: 0;
+            transform-origin: left;
+            animation: partSeaLeft 4s forwards ease-out;
+        }
+
+        .wave.right {
+            right: 0;
+            transform-origin: right;
+            background: linear-gradient(-90deg, var(--sea-dark), var(--sea-light));
+            animation: partSeaRight 4s forwards ease-out;
+        }
+
+        /* Water shimmer effect */
+        .shimmer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIj48cGF0aCBkPSJNMCAyMFExMCAxMCAyMCAyMFQ0MCAyMCIgLz48L3N2Zz4=');
+            animation: drift 10s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes partSeaLeft {
+            0% { transform: scaleX(2); }
+            100% { transform: scaleX(0.2) skewX(10deg); }
+        }
+
+        @keyframes partSeaRight {
+            0% { transform: scaleX(2); }
+            100% { transform: scaleX(0.2) skewX(-10deg); }
+        }
+
+        @keyframes drift {
+            from { background-position: 0 0; }
+            to { background-position: 0 100%; }
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for footer */
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--sand);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #ccc;
+            opacity: 0.8;
+        }
+
+        /* --- CONTROLS BAR --- */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--sand);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: transform 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+        /* --- LEADERBOARD LIST --- */
+        .leaderboard {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            display: flex;
+            align-items: center;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 15px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--sand);
+        }
+
+        /* Rank 1 Styling */
+        .card.rank-1 {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), var(--glass));
+            border: 2px solid var(--sand);
+            box-shadow: var(--glow);
+        }
+        
+        /* Rank Indicator / Icon */
+        .rank-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-left: 15px;
+            color: var(--sand);
+        }
+
+        .rank-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--sand);
+            filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
+        }
+
+        /* Profile Image */
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--sand);
+            margin-left: 15px;
+            background-color: #000;
+        }
+
+        /* Name */
+        .info {
+            flex-grow: 1;
+            text-align: right;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Points */
+        .points-container {
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .points {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--sand);
+            font-family: 'Arial', sans-serif; /* Force English Numbers */
+            direction: ltr;
+        }
+
+        .points-label {
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        /* --- ADMIN PANEL --- */
+        #admin-panel {
+            display: none; /* Hidden by default */
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--sand);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .admin-controls input, .admin-controls button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-size: 1rem;
+        }
+
+        .admin-controls input[type="text"], 
+        .admin-controls input[type="number"] {
+            background: #222;
+            color: white;
+            font-family: 'Arial', sans-serif; /* Input numbers in English */
+        }
+        
+        .admin-controls input[type="file"] {
+            background: #333;
+            color: #ccc;
+        }
+
+        .btn-add {
+            background: var(--sand);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-reset {
+            background: #8b0000;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .edit-controls {
+            display: none; /* Visible only to admin */
+            margin-right: 10px;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        .btn-edit { background: #4CAF50; color: white; }
+        .btn-del { background: #f44336; color: white; }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--sea-dark);
+            border: 1px solid var(--sand);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8rem; }
+            .card { padding: 10px; }
+            .avatar { width: 50px; height: 50px; }
+            .name { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Elements -->
+    <div class="sea-background">
+        <div class="shimmer"></div>
+        <div class="wave left"></div>
+        <div class="wave right"></div>
+    </div>
+
+    <!-- Audio Element (Hidden) -->
+    <!-- Note: Using a copyright free calming loop. Host can replace src. -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a73467.mp3?filename=calm-sea-waves-115599.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <!-- Admin Login Button -->
+            <button class="icon-btn" onclick="toggleLoginModal()" title="دخول المسؤول">🔒</button>
+            
+            <!-- Audio Controls -->
+            <div>
+                <button class="icon-btn" onclick="adjustVolume(-0.1)">🔉</button>
+                <button class="icon-btn" id="playBtn" onclick="toggleMusic()">▶</button>
+                <button class="icon-btn" onclick="adjustVolume(0.1)">🔊</button>
+            </div>
+        </div>
+
+        <header>
+            <h1>مسابقة العبور</h1>
+            <p class="subtitle">"الرَّبُّ يُقَاتِلُ عَنْكُمْ وَأَنْتُمْ تَصْمُتُونَ" (خروج 14: 14)</p>
+        </header>
+
+        <!-- Leaderboard -->
+        <ul id="leaderboard-list" class="leaderboard">
+            <!-- List items injected by JS -->
+        </ul>
+
+        <!-- Admin Panel (Hidden) -->
+        <div id="admin-panel" class="admin-controls">
+            <h2 style="color:var(--sand); margin-bottom:15px; text-align:center;">لوحة التحكم</h2>
+            
+            <input type="text" id="newName" placeholder="اسم المتسابق">
+            <input type="number" id="newPoints" placeholder="النقاط (0-9)">
+            
+            <!-- File Upload -->
+            <label style="display:block; color:#ccc; margin-bottom:5px; font-size:0.9rem;">صورة (اختياري)</label>
+            <input type="file" id="newImage" accept="image/*">
+
+            <button class="btn-add" onclick="addCompetitor()">+ إضافة متسابق</button>
+            
+            <hr style="border-color:#444; margin: 20px 0;">
+            
+            <button class="btn-reset" onclick="confirmReset()">⚠ حذف جميع البيانات وإعادة التعيين</button>
+            <button class="btn-add" style="background:#555; color:white; margin-top:10px;" onclick="logout()">تسجيل خروج</button>
+        </div>
+
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:var(--sand); margin-bottom:15px;">دخول المسؤول</h3>
+            <input type="password" id="adminPass" placeholder="كلمة المرور" class="admin-controls" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:white;">
+            <button class="btn-add" onclick="checkLogin()">دخول</button>
+            <button class="btn-sm" style="background:transparent; color:#888; margin-top:10px;" onclick="document.getElementById('loginModal').style.display='none'">إلغاء</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS & ICONS ---
+        const ADMIN_PASS = "1123"; // Simple Client-Side Password
+        
+        // SVG Strings for Biblical Icons
+        const ICON_FIRE = `<svg viewBox="0 0 24 24"><path d="M12,22c4.97,0,9-4.03,9-9c0-4.97-9-13-9-13S3,8.03,3,13C3,17.97,7.03,22,12,22z M12,6c0,0,6,7,6,10.5c0,3.03-2.69,5.5-6,5.5s-6-2.47-6-5.5C6,13,12,6,12,6z M12,10.5c0,0,2.5,2.5,2.5,5c0,1.38-1.12,2.5-2.5,2.5s-2.5-1.12-2.5-2.5C9.5,13,12,10.5,12,10.5z" fill="#ff4500"></path><path d="M12,17c-0.55,0-1-0.45-1-1c0-2,2-4,2-4s-1,2-1,4C12,16.55,11.55,17,12,17z" fill="#ffd700"></path></svg>`; // Fire Pillar
+        const ICON_TABLETS = `<svg viewBox="0 0 24 24"><path d="M19,2h-5.5C12.12,2,11,3.12,11,4.5V20h8c1.1,0,2-0.9,2-2V4C21,2.9,20.1,2,19,2z M6,20h4.5V4.5C10.5,3.12,9.38,2,8,2H5C3.9,2,3,2.9,3,4v14C3,19.1,3.9,20,6,20z" fill="#ccc"></path></svg>`; // Stone Tablets
+        const ICON_STAFF = `<svg viewBox="0 0 24 24"><path d="M18.5,2C16.57,2,15,3.57,15,5.5c0,0.48,0.09,0.94,0.26,1.36L6,19v3h2l8.72-11.63C16.89,10.74,17.17,11,17.5,11c1.93,0,3.5-1.57,3.5-3.5S19.43,2,17.5,2H18.5z" transform="rotate(-45 12 12)" fill="#8b4513"></path></svg>`; // Shepherd Staff
+
+        // Default Placeholder Data
+        const SAMPLE_DATA = [
+            { id: 1, name: "موسى النبي", points: 1500, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Moses" },
+            { id: 2, name: "هارون الكاهن", points: 1200, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aaron" },
+            { id: 3, name: "مريم النبية", points: 1150, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Miriam" },
+            { id: 4, name: "يشوع بن نون", points: 900, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Joshua" },
+            { id: 5, name: "كالب بن يفنة", points: 850, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Caleb" }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let competitors = [];
+        let isAdmin = false;
+        const bgMusic = document.getElementById('bgMusic');
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            loadData();
+            renderLeaderboard();
+            bgMusic.volume = 0.3; // Default low volume
+        };
+
+        // --- DATA LOGIC ---
+        function loadData() {
+            const stored = localStorage.getItem('exodusCompetitionData');
+            if (stored) {
+                competitors = JSON.parse(stored);
+            } else {
+                competitors = [...SAMPLE_DATA];
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('exodusCompetitionData', JSON.stringify(competitors));
+            renderLeaderboard();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+
+            // Sort by points descending
+            competitors.sort((a, b) => b.points - a.points);
+
+            competitors.forEach((comp, index) => {
+                const li = document.createElement('li');
+                li.className = `card ${index === 0 ? 'rank-1' : ''}`;
+                
+                // Determine Icon
+                let iconHtml = `<span style="font-family:Arial; opacity:0.5;">#${index + 1}</span>`;
+                if (index === 0) iconHtml = ICON_FIRE; // Pillar of Fire
+                if (index === 1) iconHtml = ICON_TABLETS; // Tablets
+                if (index === 2) iconHtml = ICON_STAFF; // Staff
+
+                const deleteBtn = isAdmin ? `<button class="btn-sm btn-del" onclick="deleteCompetitor(${comp.id})">🗑</button>` : '';
+                const editBtn = isAdmin ? `<button class="btn-sm btn-edit" onclick="editCompetitor(${comp.id})">✎</button>` : '';
+
+                li.innerHTML = `
+                    <div class="edit-controls" style="display:${isAdmin ? 'flex' : 'none'}">
+                        ${editBtn}
+                        ${deleteBtn}
+                    </div>
+                    <div class="rank-icon">${iconHtml}</div>
+                    <img src="${comp.image}" class="avatar" alt="${comp.name}" onerror="this.src='https://via.placeholder.com/60?text=?'">
+                    <div class="info">
+                        <div class="name">${comp.name}</div>
+                    </div>
+                    <div class="points-container">
+                        <div class="points">${comp.points}</div>
+                        <div class="points-label">نقاط</div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        function toggleLoginModal() {
+            if(isAdmin) {
+                logout();
+            } else {
+                document.getElementById('loginModal').style.display = 'flex';
+                document.getElementById('adminPass').value = '';
+                document.getElementById('adminPass').focus();
+            }
+        }
+
+        function checkLogin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASS) {
+                isAdmin = true;
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('loginModal').style.display = 'none';
+                renderLeaderboard(); // Re-render to show edit buttons
+            } else {
+                alert("كلمة المرور غير صحيحة");
+            }
+        }
+
+        function logout() {
+            isAdmin = false;
+            document.getElementById('admin-panel').style.display = 'none';
+            renderLeaderboard();
+        }
+
+        function confirmReset() {
+            if(confirm("هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء.")) {
+                competitors = [];
+                saveData();
+            }
+        }
+
+        function addCompetitor() {
+            const name = document.getElementById('newName').value;
+            const points = parseInt(document.getElementById('newPoints').value);
+            const fileInput = document.getElementById('newImage');
+
+            if (!name || isNaN(points)) {
+                alert("يرجى إدخال الاسم والنقاط");
+                return;
+            }
+
+            const newId = Date.now(); // Unique ID based on timestamp
+            let imageUrl = "https://via.placeholder.com/60/d4af37/000000?text=" + name.charAt(0);
+
+            // Handle Image Upload
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Check size roughly (localstorage limit is small, usually 5MB)
+                    if(e.target.result.length > 500000) {
+                        alert("الصورة كبيرة جداً، يرجى اختيار صورة أصغر.");
+                        return; 
+                    }
+                    imageUrl = e.target.result;
+                    pushToData(newId, name, points, imageUrl);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                pushToData(newId, name, points, imageUrl);
+            }
+        }
+
+        function pushToData(id, name, points, image) {
+            competitors.push({ id, name, points, image });
+            saveData();
+            // Reset Inputs
+            document.getElementById('newName').value = '';
+            document.getElementById('newPoints').value = '';
+            document.getElementById('newImage').value = '';
+        }
+
+        function deleteCompetitor(id) {
+            if(confirm("حذف هذا المتسابق؟")) {
+                competitors = competitors.filter(c => c.id !== id);
+                saveData();
+            }
+        }
+
+        function editCompetitor(id) {
+            const comp = competitors.find(c => c.id === id);
+            const newScore = prompt("تعديل النقاط لـ " + comp.name, comp.points);
+            if (newScore !== null && !isNaN(newScore)) {
+                comp.points = parseInt(newScore);
+                saveData();
+            }
+        }
+
+        // --- AUDIO FUNCTIONS ---
+        function toggleMusic() {
+            const btn = document.getElementById('playBtn');
+            if (bgMusic.paused) {
+                bgMusic.play();
+                btn.innerText = "⏸";
+            } else {
+                bgMusic.pause();
+                btn.innerText = "▶";
+            }
+        }
+
+        function adjustVolume(change) {
+            let newVol = bgMusic.volume + change;
+            if (newVol > 1) newVol = 1;
+            if (newVol < 0) newVol = 0;
+            bgMusic.volume = newVol;
+        }
+
+    </script>
+</body>
+</html>
