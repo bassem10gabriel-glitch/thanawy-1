@@ -416,7 +416,7 @@
 
         <!-- Leaderboard -->
         <ul id="leaderboard-list" class="leaderboard">
-            <li style="text-align:center; color:#888;">جاري التحميل...</li>
+            <li style="text-align:center; color:#888;">جاري التحميل والاتصال...</li>
         </ul>
 
         <!-- Admin Panel (Hidden) -->
@@ -459,12 +459,52 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- FIREBASE SETUP ---
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // --- FIREBASE SETUP LOGIC FOR EXTERNAL USE ---
+        
+        // هام: إذا كنت تستخدم هذا الملف خارج هذه المنصة (على هاتف أو استضافة خارجية)،
+        // يجب عليك إنشاء مشروع Firebase ولصق الإعدادات أدناه.
+        // استبدل كلمة null في السطر التالي بالإعدادات الخاصة بك.
+        // مثال: const MANUAL_CONFIG = { apiKey: "AIza...", authDomain: "...", projectId: "...", ... };
+        
+        const MANUAL_CONFIG = null; 
+
+        let firebaseConfig, appId;
+
+        // محاولة جلب الإعدادات
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                // نحن داخل بيئة المعاينة
+                firebaseConfig = JSON.parse(__firebase_config);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            } else if (MANUAL_CONFIG) {
+                // المستخدم قام بإضافة الإعدادات يدوياً
+                firebaseConfig = MANUAL_CONFIG;
+                appId = "custom-church-app"; 
+            } else {
+                throw new Error("No Configuration Found");
+            }
+        } catch (e) {
+            // عرض رسالة خطأ واضحة للمستخدم إذا لم تكن الإعدادات موجودة
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = `
+                <li style="text-align:center; color:#ff6b6b; padding:20px; direction:rtl; line-height:1.6; border:1px dashed #ff6b6b; background:rgba(0,0,0,0.5);">
+                    <strong>⚠️ تنبيه هام</strong><br>
+                    لم يتم العثور على إعدادات قاعدة البيانات (Firebase).<br><br>
+                    لكي يعمل الرابط على أجهزة أخرى، يجب تعديل ملف الكود وإضافة الإعدادات.<br>
+                    <span style="font-size:0.8em; color:#ccc;">
+                        1. اذهب لـ console.firebase.google.com<br>
+                        2. أنشئ مشروعاً وانسخ الـ Config<br>
+                        3. ضعه في المتغير MANUAL_CONFIG في بداية الـ script
+                    </span>
+                </li>
+            `;
+            // إيقاف تشغيل السكربت لتجنب المزيد من الأخطاء
+            throw new Error("Firebase Config Missing: Please check the code comments on how to add MANUAL_CONFIG.");
+        }
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         let currentUser = null;
         let competitors = [];
@@ -517,6 +557,8 @@
                 renderLeaderboard();
             }, (error) => {
                 console.error("Error getting documents: ", error);
+                document.getElementById('leaderboard-list').innerHTML = 
+                    `<li style="text-align:center; color:#ff6b6b;">حدث خطأ في الاتصال بالبيانات.<br>تأكد من الإنترنت أو صلاحيات الوصول.</li>`;
             });
         }
 
