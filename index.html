@@ -256,30 +256,39 @@
             const input = document.getElementById('configInput').value;
             // تنظيف المدخلات (استخراج الكائن فقط في حال نسخ المستخدم لنصوص زائدة)
             try {
-                // محاولة تحويل النص المدخل إلى كائن JSON
-                // بما أن المستخدم قد يلصق كود JS، نحاول تنظيفه ليصبح JSON صالحاً
-                let cleanJson = input.replace(/const\s+\w+\s*=\s*/, '').replace(/;/g, '');
-                // تحويل المفاتيح غير المقتبسة إلى مقتبسة (simple fix for JS object syntax)
+                // --- تحسين ذكي (Updated Logic) ---
+                // البحث عن بداية ونهاية الكائن {}
+                const firstBrace = input.indexOf('{');
+                const lastBrace = input.lastIndexOf('}');
+                
+                let cleanJson;
+                
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    // استخراج ما بين الأقواس فقط
+                    cleanJson = input.substring(firstBrace, lastBrace + 1);
+                } else {
+                    // إذا لم يجد أقواس، استخدم النص كما هو (ربما المستخدم نسخه نظيفاً)
+                    cleanJson = input;
+                }
+
+                // تنظيف إضافي لإزالة const, variable names, trailing comma
+                cleanJson = cleanJson.replace(/const\s+\w+\s*=\s*/, '')
+                                     .replace(/;/g, '');
+
+                // تحويل المفاتيح غير المقتبسة إلى مقتبسة (JS Object -> JSON)
                 cleanJson = cleanJson.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ');
-                cleanJson = cleanJson.replace(/'/g, '"'); // تحويل الفواصل الأحادية لثنائية
+                cleanJson = cleanJson.replace(/'/g, '"'); // توحيد علامات التنصيص
                 
                 // التأكد من صحة الـ JSON
-                JSON.parse(cleanJson); // Just to test
+                JSON.parse(cleanJson); // Just to test parsing
                 
                 localStorage.setItem('exodus_firebase_config', cleanJson);
                 document.getElementById('setupModal').classList.add('hidden');
                 document.getElementById('loadingOverlay').classList.remove('hidden');
                 location.reload(); // إعادة تحميل لبدء الاتصال
             } catch (e) {
-                // في حال فشل التحليل التلقائي، احفظ النص كما هو وحاول الاعتماد عليه (أو نبه المستخدم)
-                // للأمان، سننبه المستخدم
-                if(input.includes('{') && input.includes('}')) {
-                     // محاولة "قذرة" أخيرة
-                     localStorage.setItem('exodus_firebase_config', input);
-                     location.reload();
-                } else {
-                    alert("الرجاء التأكد من نسخ الكود بشكل صحيح (يجب أن يكون بين الأقواس { ... })");
-                }
+                alert("لم يتم التعرف على الكود. تأكد من نسخ ما بين الأقواس { ... } فقط.");
+                console.error(e);
             }
         }
 
