@@ -429,7 +429,7 @@
 
         <!-- Leaderboard -->
         <ul id="leaderboard-list" class="leaderboard">
-            <li style="text-align:center; color:#888;">جاري الاتصال بقاعدة البيانات...</li>
+            <li style="text-align:center; color:#888;">جاري بدء الاتصال...</li>
         </ul>
 
         <!-- Admin Panel (Hidden) -->
@@ -543,21 +543,42 @@
             { name: "مريم النبية", points: 1150, image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Miriam" }
         ];
 
-        function startApp(auth, db) {
-            // --- AUTH & INIT ---
+        async function startApp(auth, db) {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '<li style="text-align:center; color:#888;">جاري الاتصال: 1. التحقق من المستخدم...</li>';
+
             const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
+                         list.innerHTML = `
+                            <li style="text-align:center; color:#ff6b6b; direction:rtl; padding:20px; border:1px dashed red;">
+                                <strong>⚠️ خطوة ناقصة!</strong><br>
+                                خدمة "تسجيل الدخول" مغلقة في Firebase.<br><br>
+                                1. اذهب لـ Firebase Console > Build > Authentication<br>
+                                2. اضغط Get Started<br>
+                                3. اختر <strong>Anonymous</strong> واضغط Enable (تفعيل)
+                            </li>
+                        `;
+                    } else {
+                        list.innerHTML = `<li style="text-align:center; color:#ff6b6b;">خطأ في تسجيل الدخول:<br>${error.message}</li>`;
+                    }
                 }
             };
 
+            // Call auth function
             initAuth();
 
             onAuthStateChanged(auth, (user) => {
-                window.currentUser = user; // Make available globally for listeners
                 if (user) {
+                    window.currentUser = user;
+                    list.innerHTML = '<li style="text-align:center; color:#888;">جاري الاتصال: 2. جلب البيانات...</li>';
                     setupRealtimeListener(db);
                 }
             });
@@ -581,8 +602,18 @@
                 renderLeaderboard();
             }, (error) => {
                 console.error("Error getting documents: ", error);
-                document.getElementById('leaderboard-list').innerHTML = 
-                    `<li style="text-align:center; color:#ff6b6b;">حدث خطأ في الاتصال بالبيانات.<br>تأكد من الإنترنت أو صلاحيات الوصول.</li>`;
+                const list = document.getElementById('leaderboard-list');
+                
+                let errorMsg = "حدث خطأ في الاتصال بالبيانات.";
+                if (error.code === 'permission-denied') {
+                    errorMsg = "لا تملك صلاحية الوصول (Permission Denied).<br>تأكد من أن قاعدة البيانات في وضع Test Mode.";
+                }
+
+                list.innerHTML = `
+                    <li style="text-align:center; color:#ff6b6b; padding:10px;">
+                        ${errorMsg}<br>
+                        <small style="color:#aaa;">${error.code}</small>
+                    </li>`;
             });
             
             // Expose DB actions to window for UI buttons
