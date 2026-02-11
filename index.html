@@ -473,30 +473,17 @@
         import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================================
-        //         ⚠️ إعدادات قاعدة البيانات (مهم جداً) ⚠️
-        // ==========================================================
-        // لكي يعمل الرابط عند إرساله للآخرين، يجب إنشاء مشروع Firebase
-        // ونسخ الإعدادات الخاصة به ولصقها بدلاً من كلمة null في السطر التالي.
+        //         تم إضافة المفتاح الخاص بك بنجاح
         // ==========================================================
         
-        const MANUAL_CONFIG ={ apiKey: "AIzaSyBg6pe1iZkOSFV_mcKuhCkLZALNn3qAuo4",
-  authDomain: "church-competition-a50f2.firebaseapp.com",
-  projectId: "church-competition-a50f2",
-  storageBucket: "church-competition-a50f2.firebasestorage.app",
-  messagingSenderId: "137553482984",
-  appId: "1:137553482984:web:e58d24e5c3d2323ef7655d"}; 
-
-        // مثال على شكل الكود بعد اللصق (لا تنسخ هذا، انسخ الخاص بك):
-        /*
         const MANUAL_CONFIG = {
-            apiKey: "AIzaSyDxxxxxxxxxxxxxxx",
-            authDomain: "churchapp.firebaseapp.com",
-            projectId: "churchapp",
-            storageBucket: "churchapp.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:xxxxxxxxx"
+            apiKey: "AIzaSyBg6pe1iZkOSFV_mcKuhCkLZALNn3qAuo4",
+            authDomain: "church-competition-a50f2.firebaseapp.com",
+            projectId: "church-competition-a50f2",
+            storageBucket: "church-competition-a50f2.firebasestorage.app",
+            messagingSenderId: "137553482984",
+            appId: "1:137553482984:web:e58d24e5c3d2323ef7655d"
         };
-        */
 
         let firebaseConfig, appId;
 
