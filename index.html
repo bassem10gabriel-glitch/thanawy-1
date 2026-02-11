@@ -3,901 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exodus Leaderboard - مسابقة الخروج</title>
+    <title>مسابقة الخروج - Exodus Competition</title>
     
-    <!-- Google Fonts: Cairo for Arabic, Cinzel for Titles -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Fonts: Amiri for Biblical feel, Tajawal for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDKs (Required for Online Sync) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- FontAwesome for generic icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
             --sea-dark: #0f172a;
-            --sea-medium: #1e293b;
-            --sea-light: #334155;
-            --gold: #d4af37;
-            --gold-glow: #fcd34d;
+            --sea-light: #1e3a8a;
+            --sand: #f5f5f4;
+            --gold: #fbbf24;
             --fire: #ef4444;
-            --sand: #fef3c7;
-            --text-main: #f8fafc;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none; /* Prevent selection for app-like feel */
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Tajawal', sans-serif;
             background-color: var(--sea-dark);
-            color: var(--text-main);
+            color: white;
             overflow-x: hidden;
-            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- BACKGROUND ANIMATION (The Red Sea Split) --- */
-        .background-container {
+        .biblical-font {
+            font-family: 'Amiri', serif;
+        }
+
+        /* --- Red Sea Animation Background --- */
+        .red-sea-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            overflow: hidden;
+            pointer-events: none;
+            background: radial-gradient(circle at center bottom, #2c1a0d 0%, #0f172a 60%);
         }
 
-        .sea-water {
+        .wave-wall {
             position: absolute;
             top: 0;
-            height: 100%;
-            width: 55%; /* Overlap slightly */
-            background: linear-gradient(180deg, var(--sea-dark), var(--sea-medium));
-            transition: transform 3s ease-in-out;
-            opacity: 0.9;
+            bottom: 0;
+            width: 40%;
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(30, 58, 138, 0.6));
+            filter: url(#water);
+            opacity: 0.8;
+            transition: all 2s ease;
         }
 
-        .sea-left {
-            left: 0;
-            /* Start state */
-            transform: translateX(0); 
-            border-right: 2px solid rgba(255,255,255,0.1);
-            animation: splitLeft 4s forwards 0.5s;
+        .wave-left { left: 0; transform-origin: left; animation: swell 6s infinite ease-in-out; }
+        .wave-right { right: 0; transform-origin: right; animation: swell 6s infinite ease-in-out reverse; }
+
+        @keyframes swell {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(1.05); }
         }
 
-        .sea-right {
-            right: 0;
-            transform: translateX(0);
-            border-left: 2px solid rgba(255,255,255,0.1);
-            animation: splitRight 4s forwards 0.5s;
+        /* --- Leaderboard Items --- */
+        .competitor-card {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .sea-path {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 100%;
-            background: radial-gradient(circle at center, var(--sand) 0%, #b45309 80%);
-            box-shadow: 0 0 50px var(--gold-glow);
-            opacity: 0;
-            animation: revealPath 4s forwards 0.5s;
-        }
-
-        /* Bubbles/Particles */
-        .bubble {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: rise 10s infinite ease-in;
-            bottom: -20px;
-        }
-
-        @keyframes splitLeft {
-            0% { transform: translateX(0); width: 55%; }
-            100% { transform: translateX(-40%); width: 45%; } /* Move left */
-        }
-        @keyframes splitRight {
-            0% { transform: translateX(0); width: 55%; }
-            100% { transform: translateX(40%); width: 45%; } /* Move right */
-        }
-        @keyframes revealPath {
-            0% { width: 0; opacity: 0; }
-            100% { width: 30%; opacity: 0.6; }
-        }
-        @keyframes rise {
-            0% { transform: translateY(0); opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { transform: translateY(-100vh); opacity: 0; }
-        }
-
-        /* Responsive Background for Mobile */
-        @media (max-width: 768px) {
-            @keyframes revealPath { 100% { width: 90%; opacity: 0.4; } }
-            @keyframes splitLeft { 100% { transform: translateX(-80%); } }
-            @keyframes splitRight { 100% { transform: translateX(80%); } }
-        }
-
-        /* --- UI CONTAINER --- */
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* --- HEADER --- */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            color: #cbd5e1;
-            font-size: 1rem;
-            letter-spacing: 1px;
-        }
-
-        .admin-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.5);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .admin-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-
-        /* --- AUDIO PLAYER --- */
-        .audio-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-        }
-        .music-btn {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-        }
-        .music-btn:hover { box-shadow: 0 0 10px var(--gold); transform: scale(1.1); }
-
-        /* --- LEADERBOARD --- */
-        .leaderboard {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding-bottom: 100px; /* Space for fab */
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Top 3 Styling */
+        /* Top 3 Styles */
         .rank-1 {
-            border: 2px solid var(--gold);
-            background: linear-gradient(90deg, rgba(212,175,55,0.1), rgba(0,0,0,0));
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), transparent);
+            border-right: 4px solid var(--fire);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
         }
-        .rank-1::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shimmer 2s infinite;
+        .rank-2 {
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), transparent);
+            border-right: 4px solid var(--gold);
         }
-        .rank-2 { border: 1px solid #c0c0c0; }
-        .rank-3 { border: 1px solid #cd7f32; }
-
-        @keyframes shimmer {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        .rank-3 {
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.15), transparent);
+            border-right: 4px solid #94a3b8;
         }
 
-        /* Card Content */
-        .rank-badge {
-            font-weight: bold;
-            font-size: 1.2rem;
-            width: 40px;
-            text-align: center;
-            color: rgba(255,255,255,0.7);
+        .weekly-winner-glow {
+            animation: holyGlow 3s infinite alternate;
         }
 
-        .participant-info {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-            gap: 15px;
-            margin-right: 10px; /* RTL spacing */
+        @keyframes holyGlow {
+            from { box-shadow: 0 0 10px var(--gold); }
+            to { box-shadow: 0 0 30px var(--gold), 0 0 10px white; }
         }
 
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.2);
-            background-color: #1e293b;
+        /* Helpers */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .rank-1 .avatar { border-color: var(--gold); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        .name-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .name {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .title-badge {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.6);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .points-container {
-            text-align: center;
-            min-width: 60px;
-        }
-
-        .points {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--gold);
-        }
-
-        .points-label {
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.5);
-        }
-
-        /* Top 3 Icons */
-        .icon-overlay {
-            color: var(--gold);
-            font-size: 1.2rem;
-        }
-
-        /* --- ADMIN CONTROLS (Hidden by default) --- */
-        .admin-controls {
-            display: none; /* Flex when active */
-            gap: 10px;
-            margin-right: 15px;
-        }
-        
-        .btn-circle {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            transition: 0.2s;
-        }
-        .btn-add { background: #10b981; }
-        .btn-sub { background: #ef4444; }
-        .btn-edit { background: #3b82f6; }
-        .btn-del { background: #64748b; }
-
-        .host-toolbar {
-            display: none; /* Block when admin */
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid var(--gold);
-        }
-
-        .host-toolbar h3 { margin: 0 0 10px 0; color: var(--gold); font-size: 1rem; }
-        
-        .toolbar-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: var(--sea-light);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-        }
-        .action-btn:hover { background: #475569; }
-        .btn-primary { background: var(--gold); color: #000; font-weight: bold; }
-        .btn-primary:hover { background: #b5932b; }
-        .btn-danger { background: #7f1d1d; color: #fca5a5; }
-
-        /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal {
-            background: var(--sea-medium);
-            padding: 25px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 400px;
-            border: 1px solid var(--gold);
-            text-align: center;
-            position: relative;
-        }
-
-        .modal h2 { margin-top: 0; color: var(--gold); }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: right;
-        }
-
-        .input-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: white;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .file-upload {
-            border: 2px dashed #475569;
-            padding: 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        .file-upload:hover { border-color: var(--gold); }
-        
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
+        /* Arabic Number Support overrides */
+        .number-en { font-family: sans-serif; direction: ltr; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <!-- Audio Element -->
+    <!-- SVG Filters for Water Effect -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <filter id="water">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
+        </filter>
+    </svg>
+
+    <!-- Background -->
+    <div class="red-sea-bg">
+        <div class="wave-wall wave-left"></div>
+        <div class="wave-wall wave-right"></div>
+        <!-- Light reflection in center -->
+        <div class="absolute inset-0 flex justify-center items-end opacity-20 pointer-events-none">
+            <div class="w-1/3 h-full bg-gradient-to-t from-yellow-100 to-transparent"></div>
+        </div>
+    </div>
+
+    <!-- Audio Player (Hidden UI, toggled by button) -->
     <audio id="bgMusic" loop>
-        <!-- Using a free copyright calm ocean/ambient track placeholder -->
-        <source src="https://cdn.pixabay.com/download/audio/2022/03/09/audio_822ca8b438.mp3?filename=calm-ocean-waves-19632.mp3" type="audio/mp3">
+        <!-- Using a free placeholder sound of ocean/calm drone. 
+             HOST: Replace 'src' with your own MP3 file link if desired -->
+        <source src="https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3?filename=soft-ambient-116346.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Background Animation -->
-    <div class="background-container">
-        <div class="sea-path"></div>
-        <div class="sea-water sea-left"></div>
-        <div class="sea-water sea-right"></div>
-        <!-- Bubbles generated by JS -->
-        <div id="bubbles"></div>
-    </div>
-
-    <div class="app-container">
-        <header>
-            <button class="admin-btn" onclick="openLoginModal()"><i class="fas fa-lock"></i> دخول المشرف</button>
-            <div class="audio-controls">
-                <button class="music-btn" onclick="toggleMusic()" id="musicBtn"><i class="fas fa-play"></i></button>
-            </div>
-            <h1>مسابقة العبور</h1>
-            <div class="subtitle">Exodus - Moses & The Red Sea</div>
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col h-full max-w-4xl mx-auto w-full p-4">
+        
+        <!-- Header -->
+        <header class="text-center py-6 relative">
+            <h1 class="text-4xl md:text-6xl text-amber-400 biblical-font font-bold drop-shadow-lg mb-2">مسابقة رحلة الخروج</h1>
+            <p class="text-blue-200 text-lg opacity-80">"الرَّبُّ يُقَاتِلُ عَنْكُمْ وَأَنْتُمْ تَصْمُتُونَ" (خروج 14: 14)</p>
+            
+            <!-- Music Control -->
+            <button id="musicToggle" onclick="toggleMusic()" class="absolute top-4 left-4 text-white/50 hover:text-amber-400 transition">
+                <i class="fas fa-volume-mute text-2xl" id="musicIcon"></i>
+            </button>
         </header>
 
-        <!-- Admin Toolbar (Visible only after login) -->
-        <div class="host-toolbar" id="hostToolbar">
-            <h3><i class="fas fa-crown"></i> لوحة تحكم القائد (المشرف)</h3>
-            <div class="toolbar-grid">
-                <button class="action-btn btn-primary" onclick="openAddModal()">
-                    <i class="fas fa-user-plus"></i> إضافة متسابق
-                </button>
-                <button class="action-btn btn-danger" onclick="confirmReset()">
-                    <i class="fas fa-trash-alt"></i> حذف الجميع
-                </button>
-                <button class="action-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> خروج
-                </button>
+        <!-- Leaderboard Container -->
+        <main class="flex-1 overflow-hidden flex flex-col glass-panel rounded-2xl shadow-2xl">
+            <!-- Table Header -->
+            <div class="flex justify-between items-center p-4 bg-black/40 text-amber-100/70 text-sm font-bold uppercase tracking-wider">
+                <div class="w-16 text-center">الترتيب</div>
+                <div class="flex-1 pr-4">المتسابق</div>
+                <div class="w-24 text-center">النقاط</div>
             </div>
-            <div style="margin-top: 10px; font-size: 0.8rem; color: #94a3b8;">
-                * التغييرات تظهر فوراً لجميع الأجهزة المتصلة (إذا تم تفعيل الوضع الأونلاين).
-            </div>
-        </div>
 
-        <div class="leaderboard" id="leaderboardList">
-            <!-- Items rendered by JS -->
-            <div style="text-align:center; padding: 20px; color: #aaa;">جاري تحميل البيانات...</div>
+            <!-- List -->
+            <div id="leaderboardList" class="flex-1 overflow-y-auto custom-scroll relative">
+                <!-- Competitors injected here by JS -->
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="py-4 text-center text-xs text-white/30">
+            <button onclick="openAdminLogin()" class="hover:text-white transition">Admin Login</button>
+            <span> | Exodus Theme v1.0</span>
+        </footer>
+    </div>
+
+    <!-- MODAL: Admin Login -->
+    <div id="loginModal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-800 p-8 rounded-xl border border-amber-500/30 w-full max-w-sm text-center">
+            <h2 class="text-2xl text-amber-400 biblical-font mb-6">الدخول إلى لوحة التحكم</h2>
+            <input type="password" id="adminPass" placeholder="كلمة المرور" class="w-full p-3 bg-slate-900 border border-slate-700 rounded mb-4 text-center text-white focus:outline-none focus:border-amber-500">
+            <div class="flex gap-2">
+                <button onclick="closeModal('loginModal')" class="flex-1 py-2 bg-slate-700 rounded hover:bg-slate-600">إلغاء</button>
+                <button onclick="checkLogin()" class="flex-1 py-2 bg-amber-600 text-black font-bold rounded hover:bg-amber-500">دخول</button>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL: Login -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
-            <h2>دخول المشرف</h2>
-            <p>أدخل الرمز السري للتعديل</p>
-            <input type="password" id="adminPass" placeholder="كلمة السر (1123)" dir="ltr" style="text-align: center;">
-            <br><br>
-            <button class="action-btn btn-primary" style="width:100%" onclick="checkLogin()">دخول</button>
-        </div>
-    </div>
-
-    <!-- MODAL: Add/Edit Participant -->
-    <div class="modal-overlay" id="participantModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('participantModal')">&times;</button>
-            <h2 id="modalTitle">إضافة متسابق</h2>
-            <input type="hidden" id="editId">
-            
-            <div class="input-group">
-                <label>الاسم</label>
-                <input type="text" id="pName" placeholder="مثال: يوسف، مريم...">
+    <!-- MODAL: Admin Dashboard -->
+    <div id="adminModal" class="fixed inset-0 bg-black/95 z-50 flex flex-col hidden overflow-y-auto">
+        <div class="p-4 md:p-8 max-w-5xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+                <h2 class="text-3xl text-amber-400 biblical-font">لوحة تحكم القائد (Host)</h2>
+                <button onclick="logout()" class="px-4 py-2 bg-red-900/50 hover:bg-red-600 rounded text-red-200 hover:text-white transition">
+                    <i class="fas fa-sign-out-alt ml-2"></i>خروج
+                </button>
             </div>
 
-            <div class="input-group">
-                <label>النقاط</label>
-                <input type="number" id="pPoints" placeholder="0" value="0">
+            <!-- Add New Competitor -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5 mb-8">
+                <h3 class="text-xl mb-4 text-blue-200">إضافة متسابق جديد</h3>
+                <div class="flex flex-col md:flex-row gap-4 items-start">
+                    <!-- Image Upload -->
+                    <div class="w-full md:w-auto flex flex-col items-center">
+                        <label for="newImgInput" class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-600 overflow-hidden border-2 border-dashed border-slate-500">
+                            <img id="previewImg" src="" class="w-full h-full object-cover hidden">
+                            <i id="uploadIcon" class="fas fa-camera text-white/50"></i>
+                        </label>
+                        <input type="file" id="newImgInput" accept="image/*" class="hidden" onchange="handleImagePreview(this)">
+                        <span class="text-xs mt-2 text-slate-400">صورة</span>
+                    </div>
+
+                    <input type="text" id="newName" placeholder="اسم المتسابق/الفريق" class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded text-white focus:outline-none focus:border-amber-500 w-full">
+                    <input type="number" id="newPoints" placeholder="0" class="w-full md:w-24 bg-slate-900 border border-slate-700 p-3 rounded text-white text-center focus:outline-none focus:border-amber-500 number-en">
+                    
+                    <button onclick="addCompetitor()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded font-bold w-full md:w-auto">
+                        <i class="fas fa-plus ml-2"></i>إضافة
+                    </button>
+                </div>
             </div>
 
-            <div class="file-upload" onclick="document.getElementById('pImageInput').click()">
-                <i class="fas fa-camera fa-2x"></i><br>
-                <span>اضغط لرفع صورة</span>
-                <input type="file" id="pImageInput" accept="image/*" style="display: none" onchange="previewImage()">
+            <!-- Manage List -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-white/5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl text-blue-200">تعديل النقاط</h3>
+                    <button onclick="resetData()" class="text-xs text-red-400 hover:text-red-300 underline">حذف جميع البيانات</button>
+                </div>
+                
+                <div id="adminList" class="space-y-2">
+                    <!-- Admin Items injected here -->
+                </div>
             </div>
-            <img id="imagePreview" src="" style="width: 60px; height: 60px; border-radius: 50%; display: none; margin: 0 auto 15px auto;">
 
-            <button class="action-btn btn-primary" style="width:100%" onclick="saveParticipant()">حفظ</button>
+            <button onclick="closeModal('adminModal')" class="mt-8 mx-auto text-slate-400 hover:text-white">العودة للمشاهدة فقط</button>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION & SETUP
-        // ==========================================
-        
-        // 1. Storage Mode:
-        // Set to 'LOCAL' for single device (uses localStorage).
-        // Set to 'FIREBASE' for multiple devices (real-time sync).
-        const STORAGE_MODE = 'LOCAL'; 
+        /* ------------------------------------------------------------
+           CONFIGURATION & STATE
+        ------------------------------------------------------------ */
+        const STORAGE_KEY = 'exodus_competition_data';
+        const CHANNEL_NAME = 'exodus_sync_channel';
+        const PASS_HASH = '1123'; // Simple check for the requested password
 
-        // 2. Firebase Config (REQUIRED if STORAGE_MODE is 'FIREBASE')
-        // Create a project at console.firebase.google.com -> Add Web App -> Copy config here.
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
-        };
-
-        // ==========================================
-        // STATE MANAGEMENT
-        // ==========================================
-        let competitors = [];
-        let isAdmin = false;
-        let db = null;
-        const COLLECTION_NAME = 'exodus_competitors';
-
-        // Placeholder data (Used only on first load/reset)
+        // Initial Sample Data (Can be deleted by admin)
         const SAMPLE_DATA = [
-            { id: '1', name: 'موسى النبي', points: 150, image: 'https://cdn-icons-png.flaticon.com/512/3024/3024607.png' },
-            { id: '2', name: 'هارون', points: 120, image: 'https://cdn-icons-png.flaticon.com/512/3024/3024593.png' },
-            { id: '3', name: 'مريم', points: 135, image: 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png' },
-            { id: '4', name: 'يشوع', points: 90, image: 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png' }
+            { id: 1, name: "فريق موسى", points: 150, image: null },
+            { id: 2, name: "فريق هارون", points: 120, image: null },
+            { id: 3, name: "فريق مريم", points: 95, image: null },
+            { id: 4, name: "يشوع بن نون", points: 80, image: null },
+            { id: 5, name: "كالب بن يفنة", points: 60, image: null }
         ];
 
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
-        window.onload = function() {
-            initBubbles();
-            
-            if (STORAGE_MODE === 'FIREBASE') {
-                try {
-                    firebase.initializeApp(firebaseConfig);
-                    db = firebase.firestore();
-                    console.log("Firebase initialized");
-                    initRealtimeListener();
-                } catch (e) {
-                    alert("خطأ في الاتصال: تأكد من وضع إعدادات Firebase في الكود.");
-                    console.error(e);
-                    // Fallback
-                    loadFromLocal();
-                }
-            } else {
-                loadFromLocal();
-            }
+        let competitors = [];
+        let broadcastChannel;
+
+        /* ------------------------------------------------------------
+           ICONS (Inline SVG for Biblical Theme)
+        ------------------------------------------------------------ */
+        const icons = {
+            fire: `<svg class="w-8 h-8 text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c4.97 0 9-4.03 9-9 0-4.97-9-13-9-13S3 8.03 3 13c0 4.97 4.03 9 9 9zm0-2c-3.87 0-7-3.13-7-7 0-2.26 3.14-6.42 5.71-9.69C11.54 4.3 12 3.71 12 3.71s.46.59 1.29 1.6C15.86 8.58 19 12.74 19 13c0 3.87-3.13 7-7 7z"/></svg>`,
+            tablets: `<svg class="w-8 h-8 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2h12a2 2 0 012 2v18H4V4a2 2 0 012-2zm2 4v2h2V6H8zm4 0v2h2V6h-2zm-4 4v2h2v-2H8zm4 0v2h2v-2h-2zm-4 4v2h2v-2H8zm4 0v2h2v-2h-2z"/></svg>`,
+            staff: `<svg class="w-8 h-8 text-amber-600 transform rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M5 22h2l1.5-5 .5-1.5L7 3h2l2 12.5.5 1.5L13 22h2l-2.5-7-2-13H8L6 15z"/></svg>`
         };
 
-        // --- Data Loading Logic ---
-        function loadFromLocal() {
-            const stored = localStorage.getItem('exodusData');
+        /* ------------------------------------------------------------
+           INITIALIZATION
+        ------------------------------------------------------------ */
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initBroadcastChannel();
+            renderLeaderboard();
+        });
+
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 competitors = JSON.parse(stored);
             } else {
-                competitors = [...SAMPLE_DATA]; // Load samples
-                saveData();
+                competitors = [...SAMPLE_DATA];
+                saveData(false); // Save initial sample data
             }
+        }
+
+        function saveData(broadcast = true) {
+            // Sort by points DESC
+            competitors.sort((a, b) => b.points - a.points);
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(competitors));
+            
+            if (broadcast) {
+                broadcastChannel.postMessage({ type: 'UPDATE', data: competitors });
+            }
+            
             renderLeaderboard();
+            renderAdminList(); // Update admin view if open
         }
 
-        function initRealtimeListener() {
-            db.collection(COLLECTION_NAME).onSnapshot((snapshot) => {
-                competitors = [];
-                snapshot.forEach((doc) => {
-                    competitors.push({ id: doc.id, ...doc.data() });
-                });
-                renderLeaderboard();
-            });
+        /* ------------------------------------------------------------
+           SYNC LOGIC (BroadcastChannel)
+        ------------------------------------------------------------ */
+        function initBroadcastChannel() {
+            broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+            broadcastChannel.onmessage = (event) => {
+                if (event.data.type === 'UPDATE') {
+                    competitors = event.data.data;
+                    renderLeaderboard();
+                    // If admin is open on this secondary screen (unlikely but possible), update it
+                    if(!document.getElementById('adminModal').classList.contains('hidden')){
+                         renderAdminList();
+                    }
+                }
+            };
         }
 
-        // --- Data Saving Logic ---
-        function saveData() {
-            if (STORAGE_MODE === 'LOCAL') {
-                localStorage.setItem('exodusData', JSON.stringify(competitors));
-                renderLeaderboard();
-            } else {
-                // In Firebase mode, save functions handle DB calls directly
-            }
-        }
-
-        // ==========================================
-        // RENDERING
-        // ==========================================
+        /* ------------------------------------------------------------
+           RENDERING
+        ------------------------------------------------------------ */
         function renderLeaderboard() {
             const list = document.getElementById('leaderboardList');
             list.innerHTML = '';
 
-            // Sort: High to Low
-            competitors.sort((a, b) => b.points - a.points);
-
-            if (competitors.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px;">لا يوجد متسابقين حالياً</div>';
-                return;
-            }
-
-            competitors.forEach((p, index) => {
+            competitors.forEach((c, index) => {
                 const rank = index + 1;
                 let rankClass = '';
-                let icon = '';
-                let glowEffect = '';
+                let rankIcon = `<span class="text-xl font-bold number-en text-slate-500">#${rank}</span>`;
+                let glowClass = '';
 
-                // Theme Logic for Top 3
+                // Special styling for Top 3
                 if (rank === 1) {
                     rankClass = 'rank-1';
-                    icon = '<i class="fas fa-staff-snake icon-overlay" title="عصا موسى"></i> <span class="title-badge">قائد العبور</span>';
+                    rankIcon = icons.fire;
+                    glowClass = 'weekly-winner-glow';
                 } else if (rank === 2) {
                     rankClass = 'rank-2';
-                    icon = '<i class="fas fa-tablet-alt icon-overlay" title="لوحي الشريعة"></i>';
+                    rankIcon = icons.tablets;
                 } else if (rank === 3) {
                     rankClass = 'rank-3';
-                    icon = '<i class="fas fa-fire icon-overlay" title="عمود النار"></i>';
+                    rankIcon = icons.staff;
                 }
 
-                const div = document.createElement('div');
-                div.className = `card ${rankClass}`;
-                div.innerHTML = `
-                    <div class="participant-info">
-                        <div class="rank-badge">${rank}</div>
-                        <img src="${p.image || 'https://via.placeholder.com/50'}" class="avatar" alt="${p.name}">
-                        <div class="name-container">
-                            <span class="name">${p.name}</span>
-                            <span class="title-badge">${icon}</span>
+                // Image Handling (Default placeholder or User Image)
+                const imgDisplay = c.image 
+                    ? `<img src="${c.image}" class="w-full h-full object-cover">`
+                    : `<div class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-500 font-bold text-lg">${c.name.charAt(0)}</div>`;
+
+                const html = `
+                    <div class="competitor-card flex items-center p-4 ${rankClass} ${glowClass}">
+                        <!-- Rank/Icon -->
+                        <div class="w-16 flex justify-center items-center">
+                            ${rankIcon}
+                        </div>
+                        
+                        <!-- Avatar -->
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 ml-4 shadow-lg shrink-0">
+                            ${imgDisplay}
+                        </div>
+
+                        <!-- Name -->
+                        <div class="flex-1">
+                            <h3 class="text-lg md:text-xl font-bold text-white truncate">${c.name}</h3>
+                            ${rank === 1 ? '<span class="text-xs text-amber-400 font-bold animate-pulse">متصدر الأسبوع</span>' : ''}
+                        </div>
+
+                        <!-- Points -->
+                        <div class="w-24 text-center">
+                            <span class="text-2xl font-bold text-amber-400 number-en" id="score-${c.id}">${c.points}</span>
                         </div>
                     </div>
-
-                    <div class="points-container">
-                        <div class="points">${p.points}</div>
-                        <div class="points-label">نقاط</div>
-                    </div>
-
-                    <div class="admin-controls" style="display: ${isAdmin ? 'flex' : 'none'}">
-                        <button class="btn-circle btn-sub" onclick="updatePoints('${p.id}', -10)">-10</button>
-                        <button class="btn-circle btn-add" onclick="updatePoints('${p.id}', 10)">+10</button>
-                        <button class="btn-circle btn-edit" onclick="editParticipant('${p.id}')"><i class="fas fa-pen"></i></button>
-                        <button class="btn-circle btn-del" onclick="deleteParticipant('${p.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
                 `;
-                list.appendChild(div);
+                list.insertAdjacentHTML('beforeend', html);
             });
         }
 
-        // ==========================================
-        // ADMIN ACTIONS
-        // ==========================================
-        
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'flex';
+        function renderAdminList() {
+            const list = document.getElementById('adminList');
+            list.innerHTML = '';
+
+            competitors.forEach((c) => {
+                const html = `
+                    <div class="flex items-center justify-between bg-slate-900 p-3 rounded border border-slate-700">
+                        <div class="flex items-center gap-3 overflow-hidden flex-1">
+                            <div class="w-8 h-8 rounded-full bg-slate-700 overflow-hidden shrink-0">
+                                ${c.image ? `<img src="${c.image}" class="w-full h-full object-cover">` : ''}
+                            </div>
+                            <span class="truncate">${c.name}</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <button onclick="changePoints(${c.id}, -5)" class="w-8 h-8 bg-slate-700 rounded hover:bg-red-900 text-red-200 number-en">-5</button>
+                            <input onchange="manualEditPoints(${c.id}, this.value)" type="number" value="${c.points}" class="w-16 bg-black border border-slate-600 rounded p-1 text-center text-amber-400 number-en">
+                            <button onclick="changePoints(${c.id}, 5)" class="w-8 h-8 bg-slate-700 rounded hover:bg-green-900 text-green-200 number-en">+5</button>
+                            <button onclick="deleteCompetitor(${c.id})" class="w-8 h-8 ml-2 text-slate-500 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        /* ------------------------------------------------------------
+           ADMIN LOGIC
+        ------------------------------------------------------------ */
+        function openAdminLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
         }
 
         function checkLogin() {
-            const pass = document.getElementById('adminPass').value;
-            if (pass === '1123') {
-                isAdmin = true;
-                document.getElementById('hostToolbar').style.display = 'block';
-                document.querySelector('.admin-btn').style.display = 'none'; // Hide login btn
+            const input = document.getElementById('adminPass').value;
+            if (input === PASS_HASH) {
                 closeModal('loginModal');
-                renderLeaderboard(); // Re-render to show controls
-                alert('مرحباً أيها القائد. يمكنك الآن تعديل النتائج.');
+                document.getElementById('adminPass').value = '';
+                document.getElementById('adminModal').classList.remove('hidden');
+                renderAdminList();
             } else {
-                alert('كلمة المرور خاطئة');
+                alert("كلمة المرور غير صحيحة");
             }
         }
 
         function logout() {
-            isAdmin = false;
-            document.getElementById('hostToolbar').style.display = 'none';
-            document.querySelector('.admin-btn').style.display = 'block';
-            renderLeaderboard();
+            closeModal('adminModal');
         }
 
-        function confirmReset() {
-            if(confirm("هل أنت متأكد؟ سيتم حذف جميع المتسابقين!")) {
-                if (STORAGE_MODE === 'LOCAL') {
-                    competitors = [];
-                    saveData();
-                } else {
-                    // Firebase Delete All (Batch)
-                    competitors.forEach(p => {
-                        db.collection(COLLECTION_NAME).doc(p.id).delete();
-                    });
+        // Add Competitor
+        let tempImageBase64 = null;
+
+        function handleImagePreview(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempImageBase64 = e.target.result;
+                    document.getElementById('previewImg').src = tempImageBase64;
+                    document.getElementById('previewImg').classList.remove('hidden');
+                    document.getElementById('uploadIcon').classList.add('hidden');
                 }
-            }
-        }
-
-        // ==========================================
-        // DATA CRUD (Create, Read, Update, Delete)
-        // ==========================================
-
-        function updatePoints(id, amount) {
-            if (STORAGE_MODE === 'LOCAL') {
-                const p = competitors.find(c => c.id === id);
-                if (p) {
-                    p.points = parseInt(p.points) + amount;
-                    saveData();
+                // Check size (simple check)
+                if(input.files[0].size > 500000) { // 500KB limit warning
+                    alert("تحذير: الصورة كبيرة جداً. يفضل استخدام صور صغيرة لضمان سرعة الموقع.");
                 }
-            } else {
-                const p = competitors.find(c => c.id === id);
-                db.collection(COLLECTION_NAME).doc(id).update({
-                    points: parseInt(p.points) + amount
-                });
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function deleteParticipant(id) {
-            if(!confirm("حذف المتسابق؟")) return;
+        function addCompetitor() {
+            const nameInput = document.getElementById('newName');
+            const pointsInput = document.getElementById('newPoints');
             
-            if (STORAGE_MODE === 'LOCAL') {
-                competitors = competitors.filter(c => c.id !== id);
-                saveData();
-            } else {
-                db.collection(COLLECTION_NAME).doc(id).delete();
-            }
-        }
+            const name = nameInput.value.trim();
+            const points = parseInt(pointsInput.value) || 0;
 
-        // Modal Handling
-        function openAddModal() {
-            document.getElementById('modalTitle').innerText = 'إضافة متسابق جديد';
-            document.getElementById('editId').value = '';
-            document.getElementById('pName').value = '';
-            document.getElementById('pPoints').value = 0;
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('participantModal').style.display = 'flex';
-        }
+            if (!name) return alert("الرجاء كتابة الاسم");
 
-        function editParticipant(id) {
-            const p = competitors.find(c => c.id === id);
-            if (!p) return;
-
-            document.getElementById('modalTitle').innerText = 'تعديل بيانات';
-            document.getElementById('editId').value = id;
-            document.getElementById('pName').value = p.name;
-            document.getElementById('pPoints').value = p.points;
-            if(p.image) {
-                const img = document.getElementById('imagePreview');
-                img.src = p.image;
-                img.style.display = 'block';
-            }
-            document.getElementById('participantModal').style.display = 'flex';
-        }
-
-        async function saveParticipant() {
-            const id = document.getElementById('editId').value;
-            const name = document.getElementById('pName').value;
-            const points = parseInt(document.getElementById('pPoints').value);
-            const fileInput = document.getElementById('pImageInput');
-            
-            if (!name) return alert("الاسم مطلوب");
-
-            let imageBase64 = null;
-            
-            // Handle Image
-            if (fileInput.files && fileInput.files[0]) {
-                try {
-                    imageBase64 = await resizeImage(fileInput.files[0]);
-                } catch (e) {
-                    alert("خطأ في الصورة");
-                    return;
-                }
-            } else if (id) {
-                // Keep existing image if editing
-                const existing = competitors.find(c => c.id === id);
-                imageBase64 = existing.image;
-            } else {
-                // Default avatar
-                imageBase64 = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
-            }
-
-            const newDoc = {
+            const newComp = {
+                id: Date.now(),
                 name: name,
                 points: points,
-                image: imageBase64
+                image: tempImageBase64
             };
 
-            if (STORAGE_MODE === 'LOCAL') {
-                if (id) {
-                    const index = competitors.findIndex(c => c.id === id);
-                    competitors[index] = { id, ...newDoc };
-                } else {
-                    newDoc.id = Date.now().toString();
-                    competitors.push(newDoc);
-                }
+            competitors.push(newComp);
+            saveData();
+            
+            // Reset Form
+            nameInput.value = '';
+            pointsInput.value = '';
+            tempImageBase64 = null;
+            document.getElementById('previewImg').src = '';
+            document.getElementById('previewImg').classList.add('hidden');
+            document.getElementById('uploadIcon').classList.remove('hidden');
+            document.getElementById('newImgInput').value = '';
+        }
+
+        // Edit Points
+        function changePoints(id, delta) {
+            const comp = competitors.find(c => c.id === id);
+            if (comp) {
+                comp.points += delta;
                 saveData();
-            } else {
-                if (id) {
-                    db.collection(COLLECTION_NAME).doc(id).update(newDoc);
-                } else {
-                    db.collection(COLLECTION_NAME).add(newDoc);
-                }
             }
-
-            closeModal('participantModal');
-            // Clear input
-            fileInput.value = '';
         }
 
-        // ==========================================
-        // UTILITIES & VISUALS
-        // ==========================================
-        
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
+        function manualEditPoints(id, value) {
+            const comp = competitors.find(c => c.id === id);
+            if (comp) {
+                comp.points = parseInt(value) || 0;
+                saveData();
+            }
         }
 
+        // Delete
+        function deleteCompetitor(id) {
+            if(confirm('هل أنت متأكد من حذف هذا المتسابق؟')) {
+                competitors = competitors.filter(c => c.id !== id);
+                saveData();
+            }
+        }
+
+        // Reset All
+        function resetData() {
+            if(confirm('تحذير: سيتم مسح جميع البيانات والمتسابقين. هل أنت متأكد؟')) {
+                competitors = [];
+                localStorage.removeItem(STORAGE_KEY);
+                saveData();
+            }
+        }
+
+        /* ------------------------------------------------------------
+           AUDIO LOGIC
+        ------------------------------------------------------------ */
         function toggleMusic() {
             const audio = document.getElementById('bgMusic');
-            const btn = document.getElementById('musicBtn');
+            const icon = document.getElementById('musicIcon');
+            
             if (audio.paused) {
                 audio.play();
-                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+                icon.parentElement.classList.remove('text-white/50');
+                icon.parentElement.classList.add('text-amber-400');
             } else {
                 audio.pause();
-                btn.innerHTML = '<i class="fas fa-play"></i>';
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+                icon.parentElement.classList.add('text-white/50');
+                icon.parentElement.classList.remove('text-amber-400');
             }
         }
-
-        // Helper to resize images (Base64 is heavy, so we shrink it)
-        function resizeImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        // Max dimensions
-                        const MAX_WIDTH = 200;
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-                        
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 0.7 quality
-                    };
-                    img.src = event.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function previewImage() {
-            const file = document.getElementById('pImageInput').files[0];
-            const preview = document.getElementById('imagePreview');
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                preview.src = reader.result;
-                preview.style.display = "block";
-            }
-            if (file) { reader.readAsDataURL(file); }
-        }
-
-        function initBubbles() {
-            const container = document.getElementById('bubbles');
-            for(let i=0; i<15; i++) {
-                const b = document.createElement('div');
-                b.className = 'bubble';
-                b.style.left = Math.random() * 100 + '%';
-                b.style.width = (Math.random() * 10 + 5) + 'px';
-                b.style.height = b.style.width;
-                b.style.animationDuration = (Math.random() * 5 + 5) + 's';
-                b.style.animationDelay = (Math.random() * 5) + 's';
-                container.appendChild(b);
-            }
-        }
-
     </script>
 </body>
 </html>
