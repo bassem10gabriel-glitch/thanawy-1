@@ -121,6 +121,9 @@
         /* Auth Form */
         .auth-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #475569; padding: 10px; border-radius: 8px; color: white; text-align: center; margin-bottom: 10px; }
         .auth-input:focus { outline: none; border-color: #fbbf24; }
+        
+        /* Hidden Auth UI */
+        .hidden-important { display: none !important; }
     </style>
 </head>
 <body>
@@ -136,13 +139,12 @@
             <h1 class="text-4xl md:text-6xl text-amber-400 biblical-font font-bold drop-shadow-lg mb-4">مسابقة رحلة الخروج</h1>
             
             <!-- Bible Verse Block (Smaller Size) -->
-            <div class="bg-black/40 p-4 rounded-xl border-y-2 border-amber-500/30 max-w-3xl mx-auto mb-4 backdrop-blur-sm shadow-xl">
-                <p class="text-amber-100/95 text-xs md:text-sm leading-loose biblical-font text-center" style="direction: rtl;">
-                    «لِذَلِكَ قُلْ لِبَنِي إِسْرَائِيلَ: أَنَا الرَّبُّ. وَأَنَا أُخْرِجُكُمْ مِنْ تَحْتِ أَثْقَالِ الْمِصْرِيِّينَ وَأُنْقِذُكُمْ مِنْ عُبُودِيَّتِهِمْ وَأُخَلِّصُكُمْ بِذِرَاعٍ مَمْدُودَةٍ وَبِأَحْكَامٍ عَظِيمَةٍ.
-                    <br>
-                    <span class="text-amber-500 font-bold number-en mx-1">7</span> وَأَتَّخِذُكُمْ لِي شَعْبًا، وَأَكُونُ لَكُمْ إِلهًا. فَتَعْلَمُونَ أَنِّي أَنَا الرَّبُّ إِلهُكُمُ الَّذِي يُخْرِجُكُمْ مِنْ تَحْتِ أَثْقَالِ الْمِصْرِيِّينَ».
+            <div class="bg-black/40 p-3 rounded-xl border-y-2 border-amber-500/30 max-w-2xl mx-auto mb-4 backdrop-blur-sm shadow-xl">
+                <p class="text-amber-100/95 text-xs leading-loose biblical-font text-center" style="direction: rtl;">
+                    «لِذَلِكَ قُلْ لِبَنِي إِسْرَائِيلَ: أَنَا الرَّبُّ. وَأَنَا أُخْرِجُكُمْ مِنْ تَحْتِ أَثْقَالِ الْمِصْرِيِّينَ وَأُنْقِذُكُمْ مِنْ عُبُودِيَّتِهِمْ...
+                    <span class="text-amber-500 font-bold number-en mx-1">7</span> وَأَتَّخِذُكُمْ لِي شَعْبًا... وَأُعْطِيَكُمْ إِيَّاهَا مِيرَاثًا. أَنَا الرَّبُّ».
                 </p>
-                <p class="text-amber-400/60 text-[10px] mt-2 text-center font-sans number-en">(خروج 6: 6-7)</p>
+                <p class="text-amber-400/60 text-[10px] mt-1 text-center font-sans number-en">(خروج 6: 6-8)</p>
             </div>
 
             <!-- Controls -->
@@ -179,24 +181,27 @@
     <div id="signupModal" class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center hidden p-4 overflow-y-auto">
         <div id="authBox" class="w-full max-w-md bg-slate-900 border border-amber-500/30 rounded-2xl p-8 shadow-2xl flex flex-col items-center">
             <h2 class="text-3xl text-amber-400 biblical-font mb-2">تسجيل الدخول</h2>
-            <p class="text-gray-400 text-xs mb-6 text-center">سجل بريدك الإلكتروني لحفظ تقدمك وشخصيتك</p>
+            <p class="text-gray-400 text-xs mb-6 text-center">
+                سجل الدخول لحفظ تقدمك.<br>
+                (لأول مرة: سيتم إنشاء حسابك تلقائياً)
+            </p>
             <input type="email" id="authEmail" placeholder="البريد الإلكتروني" class="auth-input">
             <input type="password" id="authPass" placeholder="كلمة المرور (6 أرقام على الأقل)" class="auth-input">
-            <button onclick="handleAuth()" class="w-full bg-amber-600 hover:bg-amber-500 text-black font-bold py-3 rounded-lg mt-2">دخول / إنشاء حساب</button>
-            <p id="authError" class="text-red-400 text-xs mt-3 hidden text-center"></p>
+            <button onclick="handleAuth()" class="w-full bg-amber-600 hover:bg-amber-500 text-black font-bold py-3 rounded-lg mt-2 transition transform hover:scale-[1.02]">دخول / إنشاء حساب</button>
+            <p id="authError" class="text-red-400 text-xs mt-3 hidden text-center bg-red-900/20 p-2 rounded w-full"></p>
         </div>
 
         <div id="creatorBox" class="w-full max-w-5xl bg-slate-900 border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] hidden">
             <!-- 1. Preview -->
             <div class="md:w-1/3 bg-slate-800/50 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-l border-white/10">
                 <h2 class="text-2xl text-amber-400 biblical-font mb-2">اصنع بطلك</h2>
-                <div class="relative w-56 h-56 mb-4 bg-gradient-to-b from-blue-900/20 to-transparent rounded-full border border-white/5 flex items-center justify-center transform hover:scale-105 transition duration-500">
-                    <div id="signupAvatarPreview" class="w-48 h-48"></div>
+                <div class="relative w-64 h-64 mb-4 bg-gradient-to-b from-blue-900/20 to-transparent rounded-full border border-white/5 flex items-center justify-center transform hover:scale-105 transition duration-500">
+                    <div id="signupAvatarPreview" class="w-56 h-56"></div>
                 </div>
                 <div class="w-full space-y-3">
-                    <input type="text" id="signupName" placeholder="اسمك في اللعبة" class="auth-input">
+                    <input type="text" id="signupName" placeholder="اسمك في اللعبة" class="auth-input text-lg font-bold">
                     <div class="bg-black/30 p-3 rounded-xl border border-slate-700 flex items-center justify-between px-4">
-                        <span class="text-gray-400 text-xs">معجزتك:</span>
+                        <span class="text-gray-400 text-xs">المعجزة:</span>
                         <div class="flex items-center gap-2 text-amber-400 font-bold">
                             <span id="signupMiracleName" class="text-sm">اختر من القائمة</span>
                             <span id="signupMiracleIcon" class="text-2xl">✨</span>
@@ -214,7 +219,7 @@
                     <button onclick="setTab('miracle')" class="creator-tab text-amber-300" id="tab-miracle">المعجزة</button>
                 </div>
                 <div id="optionsContainer" class="flex-1 overflow-y-auto custom-scroll min-h-[300px] mb-6 bg-black/20 rounded-xl border border-white/5 p-4"></div>
-                <button onclick="saveNewCharacter()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg">
+                <button onclick="saveNewCharacter()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transform hover:scale-[1.01] transition">
                     حفظ وبدء اللعب <i class="fas fa-check mr-2"></i>
                 </button>
             </div>
@@ -271,7 +276,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const manualConfig = {
           apiKey: "AIzaSyDaiNplUIh8mFFOUmFTx-dnEC9HxeL2wF8",
@@ -307,37 +312,36 @@
             ]
         };
 
-        // SOCCER LEGENDS STYLE PATHS (Big Head, Clean Hair)
+        // SOCCER LEGENDS STYLE PATHS (Big Squircle Head)
         const PATHS = {
-            // Hair sits ON TOP of head (y=0 to 45), Head starts at y=20
             hair: [
-                // 0: Modern Spiky
-                `M20,45 L20,30 L30,45 L40,25 L50,45 L60,25 L70,45 L80,30 L80,45 L80,60 Q50,50 20,60 Z`,
+                // 0: Modern Spiky - Shifted UP to not cover eyes
+                `M20,20 L20,5 L30,20 L40,0 L50,20 L60,0 L70,20 L80,5 L80,20 L80,35 Q50,25 20,35 Z`,
                 // 1: Slick Back
-                `M20,50 Q20,20 50,15 Q80,20 80,50 L80,60 Q50,50 20,60 Z`,
+                `M20,25 Q20,-5 50,-10 Q80,-5 80,25 L80,35 Q50,25 20,35 Z`,
                 // 2: Side Part
-                `M15,50 Q40,10 85,45 L85,65 L80,65 Q50,55 20,65 Z`,
+                `M15,25 Q40,-15 85,20 L85,40 L80,40 Q50,30 20,40 Z`,
                 // 3: Afro / Curly
-                `M15,50 Q10,20 30,20 Q50,10 70,20 Q90,20 85,50 L85,65 Q50,55 15,65 Z`,
+                `M15,25 Q10,-5 30,-5 Q50,-15 70,-5 Q90,-5 85,25 L85,40 Q50,30 15,40 Z`,
                 // 4: Long Flowing
-                `M20,40 Q50,15 80,40 L85,90 L75,90 L75,60 Q50,50 25,60 L25,90 L15,90 Z`
+                `M20,15 Q50,-10 80,15 L85,65 L75,65 L75,35 Q50,25 25,35 L25,65 L15,65 Z`
             ],
             eyes: [
-                // 0: Big Anime/Cartoon
-                `<g><circle cx="38" cy="55" r="5" fill="white" stroke="#222"/><circle cx="38" cy="55" r="2" fill="black"/><circle cx="62" cy="55" r="5" fill="white" stroke="#222"/><circle cx="62" cy="55" r="2" fill="black"/><path d="M32,48 Q38,45 44,48" stroke="#222" stroke-width="2" fill="none"/><path d="M56,48 Q62,45 68,48" stroke="#222" stroke-width="2" fill="none"/></g>`,
+                // 0: Big Anime/Cartoon - Moved Down
+                `<g><circle cx="38" cy="50" r="5" fill="white" stroke="#222"/><circle cx="38" cy="50" r="2" fill="black"/><circle cx="62" cy="50" r="5" fill="white" stroke="#222"/><circle cx="62" cy="50" r="2" fill="black"/><path d="M32,43 Q38,40 44,43" stroke="#222" stroke-width="2" fill="none"/><path d="M56,43 Q62,40 68,43" stroke="#222" stroke-width="2" fill="none"/></g>`,
                 // 1: Determined
-                `<g><path d="M32,52 L44,55" stroke="#222" stroke-width="2"/><path d="M68,52 L56,55" stroke="#222" stroke-width="2"/><circle cx="38" cy="58" r="3" fill="black"/><circle cx="62" cy="58" r="3" fill="black"/></g>`,
+                `<g><path d="M32,47 L44,50" stroke="#222" stroke-width="2"/><path d="M68,47 L56,50" stroke="#222" stroke-width="2"/><circle cx="38" cy="53" r="3" fill="black"/><circle cx="62" cy="53" r="3" fill="black"/></g>`,
                 // 2: Happy
-                `<g><path d="M34,55 Q38,50 42,55" stroke="#222" stroke-width="2" fill="none"/><path d="M58,55 Q62,50 66,55" stroke="#222" stroke-width="2" fill="none"/></g>`
+                `<g><path d="M34,50 Q38,45 42,50" stroke="#222" stroke-width="2" fill="none"/><path d="M58,50 Q62,45 66,50" stroke="#222" stroke-width="2" fill="none"/></g>`
             ],
             mouths: [
-                `<path d="M42,70 Q50,75 58,70" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>`, 
-                `<rect x="42" y="70" width="16" height="4" rx="2" fill="white" stroke="#222"/>`,
-                `<circle cx="50" cy="72" r="4" fill="#222"/>`
+                `<path d="M42,65 Q50,70 58,65" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>`, 
+                `<rect x="42" y="65" width="16" height="4" rx="2" fill="white" stroke="#222"/>`,
+                `<circle cx="50" cy="67" r="4" fill="#222"/>`
             ],
             clothes: [
-                "M25,90 Q50,130 75,90 L75,120 Q50,130 25,120 Z", // Jersey
-                "M20,90 L80,90 L85,120 L15,120 Z", // Robe
+                "M25,85 Q50,125 75,85 L75,115 Q50,125 25,115 Z", // Jersey
+                "M20,85 L80,85 L85,115 L15,115 Z", // Robe
             ]
         };
 
@@ -350,14 +354,14 @@
             <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-xl avatar-svg">
                 <!-- Body -->
                 <path d="${PATHS.clothes[s.clothesStyle] || PATHS.clothes[0]}" fill="${s.clothesColor}" />
-                <path d="M25,90 L15,105 M75,90 L85,105" stroke="${s.clothesColor}" stroke-width="4" stroke-linecap="round"/>
+                <path d="M25,85 L15,100 M75,85 L85,100" stroke="${s.clothesColor}" stroke-width="4" stroke-linecap="round"/>
                 
                 <!-- Head Group -->
                 <g transform="translate(0, 5)">
                     <!-- Face Shape (Squircle for Soccer Legend Look) -->
-                    <rect x="25" y="25" width="50" height="60" rx="18" fill="${s.skinColor}" />
+                    <rect x="25" y="20" width="50" height="60" rx="18" fill="${s.skinColor}" />
                     <!-- Nose -->
-                    <path d="M50,58 L48,65 L52,65 Z" fill="#dbbba5" opacity="0.5"/>
+                    <path d="M50,53 L48,60 L52,60 Z" fill="#dbbba5" opacity="0.5"/>
                     <!-- Features -->
                     ${PATHS.eyes[s.eyeStyle] || PATHS.eyes[0]}
                     ${PATHS.mouths[s.mouthStyle] || PATHS.mouths[0]}
@@ -399,23 +403,38 @@
 
                         renderLeaderboard();
                         if(window.isAdmin) renderAdminList();
+                        
+                        // Smart Auth Check: If logged in, check if user has a character
+                        if (window.currentUser) {
+                            const myChar = window.competitors.find(c => c.id === window.currentUser.uid);
+                            if (myChar) {
+                                // Has character -> Hide all modals
+                                document.getElementById('signupModal').classList.add('hidden');
+                            } else {
+                                // Logged in but NO character -> Show Creator
+                                document.getElementById('signupModal').classList.remove('hidden');
+                                document.getElementById('authBox').classList.add('hidden');
+                                document.getElementById('creatorBox').classList.remove('hidden');
+                                if (!document.querySelector('.creator-tab.active')) {
+                                    window.setTab('skin');
+                                    renderOptions('skin');
+                                    window.updateSignupPreview();
+                                }
+                            }
+                        }
                     } else {
                         setDoc(docRef, { teams: [], verse: "مرحباً" });
                     }
                 });
 
-                // Check Login Status
-                window.auth.onAuthStateChanged(async (user) => {
+                // Auth Listener
+                onAuthStateChanged(window.auth, (user) => {
                     if (user) {
                         window.currentUser = user;
                         document.getElementById('connectionDot').className = 'status-dot status-online';
                         document.getElementById('connectionText').textContent = user.email;
-                        document.getElementById('signupModal').classList.add('hidden');
-                        
-                        // Check if user has a character in DB
-                        // Note: In this simple structure, we check if user.uid matches any team ID
-                        // Ideally we store user profile in separate collection, but keeping single file simple
                     } else {
+                        // Not logged in -> Show Login
                         document.getElementById('signupModal').classList.remove('hidden');
                         document.getElementById('authBox').classList.remove('hidden');
                         document.getElementById('creatorBox').classList.add('hidden');
@@ -428,7 +447,7 @@
             }
         });
 
-        // --- Auth Logic ---
+        // --- Auth Logic (Smart Button) ---
         window.handleAuth = async function() {
             const email = document.getElementById('authEmail').value;
             const pass = document.getElementById('authPass').value;
@@ -439,48 +458,37 @@
                 return;
             }
             
-            if(pass.length < 6) {
-                alert("كلمة المرور يجب أن تكون 6 أرقام على الأقل");
-                return;
-            }
-
-            // Show loading state on button
             const btn = document.querySelector('#authBox button');
             const originalText = btn.innerText;
             btn.innerText = "جاري التحقق...";
             btn.disabled = true;
+            errBox.classList.add('hidden');
 
             try {
-                // 1. Try to Login first
+                // 1. Try Login
                 await signInWithEmailAndPassword(window.auth, email, pass);
-                // If successful, onAuthStateChanged will handle the rest
+                // Success -> onAuthStateChanged handles the rest
             } catch (e) {
-                console.log("Login failed, trying signup...", e.code);
-                
-                // 2. If user not found, try to Create Account
-                if(e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password') {
+                // 2. If User Not Found -> Create
+                if(e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
                     try {
-                        const cred = await createUserWithEmailAndPassword(window.auth, email, pass);
-                        // If successful, flow moves to creator
+                        await createUserWithEmailAndPassword(window.auth, email, pass);
                         document.getElementById('authBox').classList.add('hidden');
                         document.getElementById('creatorBox').classList.remove('hidden');
                         window.setTab('skin');
                         renderOptions('skin');
                         window.updateSignupPreview();
                     } catch (createErr) {
-                        console.error("Signup error:", createErr);
                         if (createErr.code === 'auth/email-already-in-use') {
-                            alert("هذا البريد مسجل بالفعل، لكن كلمة المرور غير صحيحة.");
-                        } else if (createErr.code === 'auth/operation-not-allowed') {
-                            alert("⚠️ هام جداً: يجب تفعيل خدمة Email/Password في موقع فايربيس (Authentication > Sign-in method)");
-                        } else if (createErr.code === 'auth/weak-password') {
-                            alert("كلمة المرور ضعيفة جداً.");
+                            errBox.textContent = "الحساب موجود بالفعل، لكن كلمة المرور خاطئة.";
                         } else {
-                            alert("خطأ في الإنشاء: " + createErr.message);
+                            errBox.textContent = translateError(createErr.code);
                         }
+                        errBox.classList.remove('hidden');
                     }
                 } else {
-                    alert("خطأ في الدخول: " + e.message);
+                    errBox.textContent = translateError(e.code);
+                    errBox.classList.remove('hidden');
                 }
             } finally {
                 btn.innerText = originalText;
@@ -488,28 +496,37 @@
             }
         }
 
+        function translateError(code) {
+            if(code === 'auth/wrong-password') return "كلمة المرور غير صحيحة.";
+            if(code === 'auth/invalid-credential') return "البيانات غير صحيحة.";
+            if(code === 'auth/email-already-in-use') return "هذا البريد مستخدم بالفعل.";
+            if(code === 'auth/weak-password') return "كلمة المرور ضعيفة (6 أرقام على الأقل).";
+            if(code === 'auth/invalid-email') return "صيغة البريد الإلكتروني غير صحيحة.";
+            if(code === 'auth/operation-not-allowed') return "⚠️ خطأ: يجب تفعيل Email/Password في إعدادات فايربيس.";
+            if(code === 'auth/too-many-requests') return "تم حظر الدخول مؤقتاً بسبب كثرة المحاولات. الرجاء الانتظار قليلاً.";
+            return "حدث خطأ: " + code;
+        }
+
         window.saveNewCharacter = async function() {
             const name = document.getElementById('signupName').value.trim();
             if (!name) return alert("الرجاء كتابة الاسم");
 
             const newComp = { 
-                id: window.currentUser.uid, // Link to Auth ID
+                id: window.currentUser.uid, 
                 name: name, 
                 points: 0, 
                 avatar: { ...window.avatarState },
                 miracle: window.selectedMiracle
             };
 
-            // Check if already exists (to prevent duplicates)
+            // Double check existence
             const exists = window.competitors.find(c => c.id === window.currentUser.uid);
             
             try {
                 if(exists) {
-                    // Update existing
                     const updatedTeams = window.competitors.map(c => c.id === window.currentUser.uid ? newComp : c);
                     await updateDoc(doc(window.db, "competitions", DOC_ID), { teams: updatedTeams });
                 } else {
-                    // Add new
                     await updateDoc(doc(window.db, "competitions", DOC_ID), { teams: arrayUnion(newComp) });
                 }
                 document.getElementById('signupModal').classList.add('hidden');
@@ -568,7 +585,6 @@
                     container.innerHTML += `<div class="color-dot ${window.avatarState.skinColor === c ? 'selected' : ''}" style="background:${c}" onclick="setAvatarProp('skinColor', '${c}')"></div>`;
                 });
             } else if (type === 'hair') {
-                container.innerHTML = `<div class="col-span-full text-xs text-gray-400 mb-1 w-full text-center">لون الشعر</div>`;
                 const colorDiv = document.createElement('div'); colorDiv.className = "option-grid mb-4 col-span-full";
                 ASSETS.hairColors.forEach(c => {
                     colorDiv.innerHTML += `<div class="color-dot ${window.avatarState.hairColor === c ? 'selected' : ''}" style="background:${c}" onclick="setAvatarProp('hairColor', '${c}')"></div>`;
@@ -580,7 +596,6 @@
                     container.innerHTML += `<div class="item-btn ${window.avatarState.hairStyle === i ? 'selected' : ''}" onclick="setAvatarProp('hairStyle', ${i})"><div class="w-10 h-10 overflow-hidden relative">${window.getAvatarSVG(tempState)}</div></div>`;
                 });
             } else if (type === 'clothes') {
-                container.innerHTML = `<div class="col-span-full text-xs text-gray-400 mb-1 w-full text-center">لون الملابس</div>`;
                 const colorDiv = document.createElement('div'); colorDiv.className = "option-grid mb-4 col-span-full";
                 ASSETS.clothesColors.forEach(c => {
                     colorDiv.innerHTML += `<div class="color-dot ${window.avatarState.clothesColor === c ? 'selected' : ''}" style="background:${c}" onclick="setAvatarProp('clothesColor', '${c}')"></div>`;
@@ -640,18 +655,15 @@
             overlay.innerHTML = ''; 
             document.body.style.overflow = 'hidden';
 
-            // Find transformation from assets
-            // Note: In module ASSETS is not global, so we define simple logic here or use data attributes
-            // Simple hardcoded map for animations
             let content = '';
-            if(type === 'bush') content = `<div class="text-9xl animate-bounce">🔥🌳</div>`;
-            else if(type === 'snake') content = `<div class="text-[150px] transition-all duration-1000 transform rotate-12">🐍</div>`;
-            else if(type === 'blood') content = `<div class="absolute inset-0 bg-red-700/60 z-10 animate-pulse"></div><div class="z-20 text-9xl">🩸</div>`;
-            else if(type === 'sea') content = `<div class="flex w-full h-full"><div class="w-1/2 bg-blue-600/80 translate-x-[-100%] transition duration-1000 transform translate-x-0"></div><div class="w-1/2 bg-blue-600/80 translate-x-[100%] transition duration-1000 transform translate-x-0"></div></div>`;
+            if(type === 'bush') content = `<div class="text-[120px] transition-all duration-1000 animate-bounce">🔥🌳</div>`;
+            else if(type === 'snake') content = `<div class="flex flex-col items-center"><div class="text-[100px] animate-[spin_0.5s_ease-out]">🪵</div><div class="text-[150px] absolute transition-all duration-1000 transform scale-150 text-green-500 animate-pulse delay-500">🐍</div></div>`;
+            else if(type === 'blood') content = `<div class="absolute inset-0 bg-blue-500/50 z-10 transition-colors duration-1000 bg-red-700/80 flex items-center justify-center"><div class="text-9xl animate-bounce">💧 ➡️ 🩸</div></div>`;
+            else if(type === 'sea') content = `<div class="flex w-full h-full"><div class="w-1/2 bg-blue-600/80 translate-x-[-100%] transition duration-1000 transform translate-x-0 border-r-4 border-white"></div><div class="w-1/2 bg-blue-600/80 translate-x-[100%] transition duration-1000 transform translate-x-0 border-l-4 border-white"></div></div>`;
             else if(type === 'frog') content = `<div class="grid grid-cols-3 gap-10"><div class="text-8xl animate-bounce">🐸</div><div class="text-8xl animate-bounce delay-100">🐸</div><div class="text-8xl animate-bounce delay-200">🐸</div></div>`;
             else content = `<div class="text-9xl animate-pulse">✨</div>`;
 
-            overlay.innerHTML = `<div class="flex items-center justify-center h-full w-full">${content}</div>`;
+            overlay.innerHTML = `<div class="flex items-center justify-center h-full w-full bg-black/60 backdrop-blur-sm">${content}</div>`;
 
             setTimeout(() => {
                 overlay.classList.add('hidden');
@@ -674,7 +686,8 @@
                 else if (rank === 3) { rankClass = 'rank-3'; }
 
                 const avatarSvg = window.getAvatarSVG ? window.getAvatarSVG(c.avatar) : '';
-                // Get Base Icon
+                
+                // Show Base Icon until clicked
                 const miracleMap = { 'bush':'🌳', 'snake':'🪵', 'blood':'💧', 'sea':'🌊', 'frog':'⛲', 'light':'☁️', 'manna':'🧺' };
                 const baseIcon = miracleMap[c.miracle] || '✨';
                 
@@ -716,10 +729,10 @@
                             <span class="truncate text-xs font-bold text-gray-300">${c.name}</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="changePoints(${c.id}, -5)" class="w-6 h-6 bg-slate-700 rounded hover:bg-red-900 text-red-200 text-xs font-bold">-5</button>
+                            <button onclick="changePoints('${c.id}', -5)" class="w-6 h-6 bg-slate-700 rounded hover:bg-red-900 text-red-200 text-xs font-bold">-5</button>
                             <span class="w-10 text-center text-amber-400 font-mono text-sm">${c.points}</span>
-                            <button onclick="changePoints(${c.id}, 5)" class="w-6 h-6 bg-slate-700 rounded hover:bg-green-900 text-green-200 text-xs font-bold">+5</button>
-                            <button onclick="deleteCompetitor(${c.id})" class="w-6 h-6 ml-1 text-slate-500 hover:text-red-500 text-xs"><i class="fas fa-trash"></i></button>
+                            <button onclick="changePoints('${c.id}', 5)" class="w-6 h-6 bg-slate-700 rounded hover:bg-green-900 text-green-200 text-xs font-bold">+5</button>
+                            <button onclick="deleteCompetitor('${c.id}')" class="w-6 h-6 ml-1 text-slate-500 hover:text-red-500 text-xs"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `);
